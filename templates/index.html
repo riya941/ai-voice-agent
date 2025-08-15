@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AI Voice Agent</title>
+  <!-- Link to CSS in static folder -->
+  <link rel="stylesheet" href="/static/styles.css" />
+</head>
+
+<body>
+  <div class="container">
+    <h1>🎙️ AI Voice Agent <span>Your Conversational Partner</span></h1>
+
+    <div class="chat-box">
+      <div id="userMessage" class="message user" style="display:none"></div>
+      <div id="aiMessage" class="message ai"  style="display:none" ></div>
+    </div>
+
+    <button id="recordBtn" onclick="toggleRecording()">🎤 Start Recording</button>
+    <p id="uploadStatus"></p>
+
+    <!-- Hidden audio player -->
+    <audio id="echoAudio" style="display:none;"></audio>
+  </div>
+
+  <script src="/static/script.js"></script>
+</body>
+
+</html>
