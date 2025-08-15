@@ -42,7 +42,7 @@ Aiagent/
 └── chat_sessions/        # (Optional) For persistent chat history storage
 ```
 # 1️⃣ Clone the repository
-git clone https://github.com/yourusername/Aiagent.git
+git clone https://github.com/riya941/Aiagent.git
 cd Aiagent
 
 # 2️⃣ Create and activate virtual environment
