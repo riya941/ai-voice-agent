@@ -1,0 +1,11 @@
+fastapi
+uvicorn[standard]
+jinja2
+python-dotenv
+pydantic>=2.0
+requests
+websockets
+google-genai
+tavily-python
+assemblyai
+httpx
