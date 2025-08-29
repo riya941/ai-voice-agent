@@ -5,27 +5,67 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>AI Voice Agent</title>
-  <!-- Link to CSS in static folder -->
-  <link rel="stylesheet" href="/static/styles.css" />
+  <link rel="stylesheet" href="/style.css" />
 </head>
 
 <body>
   <div class="container">
-    <h1>🎙️ AI Voice Agent <span>Your Conversational Partner</span></h1>
+    <h1>🌌 Detective Vega : The Mysterious AI Companion <span>Your Conversational Partner</span></h1>
 
-    <div class="chat-box">
-      <div id="userMessage" class="message user" style="display:none"></div>
-      <div id="aiMessage" class="message ai"  style="display:none" ></div>
+    <p class="warning-text">⚠️ You must provide <strong>all API keys</strong> in order for the agent to work.</p>
+
+    <button id="openKeysBtn" class="open-modal-btn">🔑 Set API Keys</button>
+
+    <!-- Modal -->
+    <div id="keysModal" class="modal">
+      <div class="modal-content">
+        <span id="closeModal" class="close-btn">&times;</span>
+        <h2>🔑 API Key Settings</h2>
+
+        <div class="modal-input">
+          <label for="googleKey">Google API Key:</label>
+          <input type="password" id="googleKey" placeholder="Enter Google API Key" />
+        </div>
+
+        <div class="modal-input">
+          <label for="tavilyKey">Tavily API Key:</label>
+          <input type="password" id="tavilyKey" placeholder="Enter Tavily API Key" />
+        </div>
+
+        <div class="modal-input">
+          <label for="assemblyKey">AssemblyAI API Key:</label>
+          <input type="password" id="assemblyKey" placeholder="Enter AssemblyAI API Key" />
+        </div>
+
+        <div class="modal-input">
+          <label for="murfKey">Murf API Key:</label>
+          <input type="password" id="murfKey" placeholder="Enter Murf API Key" />
+        </div>
+
+        <div class="modal-input">
+          <label>OpenWeather API Key:</label>
+          <input type="password" id="openweatherKey" placeholder="Enter OpenWeather API Key" />
+        </div>
+
+        <button id="saveKeysBtn" class="save-btn">💾 Save Keys</button>
+        <p id="saveStatus" style="display:none;">✅ Keys saved successfully!</p>
+      </div>
     </div>
 
-    <button id="recordBtn" onclick="toggleRecording()">🎤 Start Recording</button>
-    <p id="uploadStatus"></p>
+    <div class="chat-box">
+      <div id="aiMessage" class="message ai" style="display:none"></div>
+      <div id="llmReply">
+        <span id="llmText"></span>
+      </div>
+    </div>
+    <div id="audioContainer" style="display:none; margin-top:10px;">
+      <audio id="aiAudio" controls></audio>
+    </div>
 
-    <!-- Hidden audio player -->
-    <audio id="echoAudio" style="display:none;"></audio>
+    <button id="recordBtn">🎤 Start Recording</button>
   </div>
 
-  <script src="/static/script.js"></script>
+  <script src="/script.js"></script>
 </body>
 
 </html>

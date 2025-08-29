@@ -5,65 +5,102 @@ from fastapi.templating import Jinja2Templates
 from fastapi import File, UploadFile
 from pydantic import BaseModel
 from typing import Dict, List
-
+from routes.transcriber import AssemblyAIStreamingTranscriber
+from utils.logging import setup_logger
+import os
+import asyncio
+from routes import agent_chat
+from fastapi import  WebSocket
+from config import set_user_keys, USER_KEYS
+from fastapi.responses import FileResponse, JSONResponse
 from services.stt_service import transcribe_audio
-from services.tts_service import text_to_speech, fallback_response
-from services.llm_service import generate_response
+from services.tts_service import text_to_speech
+from fastapi.responses import FileResponse
+from services.llm_service import stream_generate_response
+
+setup_logger()
 
 app = FastAPI()
 chat_sessions: Dict[str, List[dict]] = {}
 
+OUTPUT_DIR = os.path.join("Agent", "Output")
+os.makedirs(OUTPUT_DIR, exist_ok=True)
+
 app.mount("/static", StaticFiles(directory="static"), name="static")
 templates = Jinja2Templates(directory="templates")
 
-
-class ChatResponse(BaseModel):
-    transcript: str
-    llm_response: str
-    audio_url: str
+app.include_router(agent_chat.router)
 
 
-@app.get("/", response_class=HTMLResponse)
-def get_home(request: Request):
-    return templates.TemplateResponse("index.html", {"request": request})
-
-   
-
-@app.post("/agent/chat/{session_id}", response_model=ChatResponse)
-async def chat_with_agent(session_id: str, file: UploadFile = File(...)):
+@app.post("/set-keys")
+async def set_keys(request: Request):
+    """
+    Receive API keys from frontend UI and update USER_KEYS in config.py.
+    Payload example:
+    {
+        "google_api_key": "...",
+        "tavily_api_key": "...",
+        "assembly_api_key": "...",
+        "murf_api_key": "...",
+        "openweather_api_key": "..."
+    }
+    """
     try:
-        audio_bytes = await file.read()
-        user_message = transcribe_audio(audio_bytes)
+        data = await request.json()
+        set_user_keys(data)
 
-        if not user_message:
-            raise HTTPException(status_code=400, detail="No speech detected.")
+        missing = [k for k, v in data.items() if not v]
+        if missing:
+            return JSONResponse({
+                "status": "error",
+                "message": f"Missing required keys: {', '.join(missing)}"
+            })
 
-        if session_id not in chat_sessions:
-            chat_sessions[session_id] = []
+        return JSONResponse({"status": "success", "message": "API keys updated."})
+    except Exception as e:
+        return JSONResponse({"status": "error", "message": str(e)})
+    
+@app.websocket("/ws/{session_id}")
+async def websocket_endpoint(websocket: WebSocket, session_id: str):
+    await websocket.accept()
+    print("🎤 Client connected")
 
-        chat_sessions[session_id].append({"role": "user", "content": user_message})
+    if session_id not in chat_sessions:
+        chat_sessions[session_id] = []
 
-        conversation_text = (
-            "You are a helpful conversational AI. If the user's question is about something "
-            "already mentioned in this conversation, use that memory. "
-            "If it is a general knowledge question, answer it based on your own knowledge.\n\n"
-        )
+    file_path = os.path.join(OUTPUT_DIR, "recorded_audio.webm")
+    if os.path.exists(file_path):
+        os.remove(file_path)
 
-        for msg in chat_sessions[session_id]:
-            role_label = "User" if msg["role"] == "user" else "Assistant"
-            conversation_text += f"{role_label}: {msg['content']}\n"
+    loop = asyncio.get_event_loop()
+    transcriber = AssemblyAIStreamingTranscriber(websocket=websocket,  loop=loop, chat_sessions=chat_sessions,
+    session_id=session_id,sample_rate=44100)
+    
 
-        assistant_reply = generate_response(conversation_text)
-        chat_sessions[session_id].append({"role": "assistant", "content": assistant_reply})
-
-        audio_url = text_to_speech(assistant_reply)
-
-        return ChatResponse(
-            transcript=user_message,
-            llm_response=assistant_reply,
-            audio_url=audio_url
-        )
+    try:
+        with open(file_path, "ab") as f:
+            while True:
+                data = await websocket.receive_bytes()
+                f.write(data)
+                transcriber.stream_audio(data)
 
     except Exception as e:
-        print(f"Error: {e}")
-        return fallback_response("I'm having trouble connecting right now.")
+        print(f"⚠️ WebSocket connection closed: {e}")
+
+    finally:
+        transcriber.close()
+        print(f"✅ Audio saved at {file_path}")
+
+@app.get("/")
+def get_homepage():
+    return FileResponse("templates/index.html", media_type="text/html")
+
+@app.get("/style.css")
+def get_style():
+    return FileResponse("static/styles.css", media_type="text/css")
+
+@app.get("/script.js")
+def get_script():
+    return FileResponse("static/script.js", media_type="application/javascript")
+
+app.include_router(agent_chat.router)
