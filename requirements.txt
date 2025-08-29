@@ -5,7 +5,9 @@ python-dotenv
 pydantic>=2.0
 requests
 websockets
+websocket-client
 google-genai
 tavily-python
 assemblyai
 httpx
+murf
