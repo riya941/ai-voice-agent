@@ -116,13 +116,12 @@ def stream_generate_response(*, user_text: str, conversation_text: str):
       try:
           skill_result = execute_skill_function("get_weather", {"location": location})
           if skill_result.get("success"):
-            #reply = (
-            #   f"Detective Vega. The weather in {skill_result['location']} is "
-            #    f"{skill_result['condition']} at {skill_result['temperature']}°C. "
-            #   "A curious atmosphere indeed."
-            #)
-            #yield reply
-            yield skill_result["answer"]
+            reply = (
+                f"Detective Vega. The weather in {skill_result['location']} is "
+                f"{skill_result['condition']} at {skill_result['temperature']}°C. "
+                "A curious atmosphere indeed."
+            )
+            yield reply
           else:
             yield f"⚠️ Could not fetch weather: {skill_result.get('error','Unknown error')}"
       except Exception as e:
@@ -141,28 +140,16 @@ def stream_generate_response(*, user_text: str, conversation_text: str):
             query = extract_search_query(user_text)
             results = tavily_client.search(query, max_results=5, include_answer=True)
             if results.get("answer"):
-                yield results['answer']
+                yield f"Detective Vega. {results['answer']}"
                 return
-            
-            #if results.get("results"):
-            #   top = results["results"][0]
-            #    title = top.get("title", "Result")
-            #   url = top.get("url", "")
-            #   snippet = top.get("content", "")[:160]
-            #   yield f"Detective Vega. Here's what I found: {title} - {url}. {snippet} … The trail of truth begins here."
-            #   return
-
             if results.get("results"):
-                reply_lines = []
-                for r in results["results"][:3]:  # show top 3
-                    title = r.get("title", "Result")
-                    url = r.get("url", "")
-                    snippet = r.get("content", "")[:200]
-                    reply_lines.append(f"- {title}: {snippet} ({url})")
-                yield "\n".join(reply_lines)
+                top = results["results"][0]
+                title = top.get("title", "Result")
+                url = top.get("url", "")
+                snippet = top.get("content", "")[:160]
+                yield f"Detective Vega. Here's what I found: {title} - {url}. {snippet} … The trail of truth begins here."
                 return
-            
-            yield " No clean leads from the web this time."
+            yield "Detective Vega. No clean leads from the web this time."
         except Exception as e:
             yield f"⚠️ Web search error: {e}"
         return
@@ -179,7 +166,7 @@ def stream_generate_response(*, user_text: str, conversation_text: str):
         if resp.text:
             yield resp.text
         else:
-            yield "The silence is suspicious. Try asking again."
+            yield "Detective Vega. The silence is suspicious. Try asking again."
     except Exception as e:
         yield f"⚠️ LLM error: {e}"
 
