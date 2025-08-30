@@ -34,11 +34,14 @@ def get_weather(location: str) -> dict:
             "success": True,
             "location": data["name"],
             "temperature": data["main"]["temp"],
+            "feels_like": data["main"]["feels_like"],
+            "humidity": data["main"]["humidity"],
+            "wind_speed": data["wind"]["speed"],
             "condition": data["weather"][0]["description"],
             "answer": (
-                f"Detective Vega. The weather in {data['name']} is "
-                f"{data['weather'][0]['description']} at {data['main']['temp']}°C. "
-                "A curious atmosphere indeed."
+                f"The weather in {data['name']} is {data['weather'][0]['description']} "
+                f"at {data['main']['temp']}°C (feels like {data['main']['feels_like']}°C). "
+                f"Humidity is {data['main']['humidity']}% with wind speed {data['wind']['speed']} m/s."
             )
         }
         return weather
