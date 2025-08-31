@@ -200,22 +200,20 @@ h1 span { font-size: 1rem; display: block; font-weight: 300; opacity: 0.8; }
 }
 .powered-by-murf {
   position: fixed;
-  top: 20px;
-  right: 20px;
+  top: 10px;       /* more space from the very top */
+  right: 10px;     /* more space from the right edge */
   background-color: white;
-  color: violet;
-  border: 2px solid violet;
-  border-radius: 8px;
-  padding: 8px 16px;
-  text-decoration: none;
-  font-weight: bold;
+  color: black;
+  border: 1px solid #ccc;   /* light border for box look */
+  border-radius: 6px;
+  padding: 6px 12px;        /* smaller box */
+  text-decoration: none;    /* remove underline */
   font-size: 14px;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  z-index: 1000; /* keep it above other elements */
+  font-weight: 500;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1); /* subtle shadow */
+  z-index: 1000;            /* always on top */
 }
 
 .powered-by-murf:hover {
-  background-color: violet;
-  color: white;
+  background-color: #f0f0f0; /* slight gray on hover */
 }
