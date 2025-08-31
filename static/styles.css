@@ -198,3 +198,24 @@ h1 span { font-size: 1rem; display: block; font-weight: 300; opacity: 0.8; }
   font-weight: bold;
   margin-bottom: 10px;
 }
+.powered-by-murf {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  background-color: white;
+  color: violet;
+  border: 2px solid violet;
+  border-radius: 8px;
+  padding: 8px 16px;
+  text-decoration: none;
+  font-weight: bold;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  z-index: 1000; /* keep it above other elements */
+}
+
+.powered-by-murf:hover {
+  background-color: violet;
+  color: white;
+}
